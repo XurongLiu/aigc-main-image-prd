@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 主图 PRD · SaleCapitAI</title>
+<meta name="description" content="SaleCapitAI「AI 主图」功能的 HTML PRD：用户路径、多状态页面、边界异常、AI 初稿对照、埋点与漏斗。">
+<link rel="stylesheet" href="assets/css/phone.css">
+<link rel="stylesheet" href="assets/css/prd.css">
+</head>
+<body>
+
+<aside class="toc" aria-label="目录">
+  <div class="toc-brand">
+    <div class="toc-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
+    <div><b>AI 主图 PRD</b><span>SaleCapitAI · v1.0</span></div>
+  </div>
+  <nav>
+    <a href="#ch0"><i>0</i><span>概览<small>背景、目标、范围</small></span></a>
+    <a href="#ch1"><i>1</i><span>用户路径与模块流程<small>主路径 + 5 类异常</small></span></a>
+    <a href="#ch2"><i>2</i><span>核心页面多状态<small>7 个状态</small></span></a>
+    <a href="#ch3"><i>3</i><span>交互标注与边界异常<small>16 个场景</small></span></a>
+    <a href="#ch4"><i>4</i><span>AI 初稿 vs 我的修改<small>5 处修改</small></span></a>
+    <a href="#ch5"><i>5</i><span>埋点与漏斗<small>15 个事件</small></span></a>
+  </nav>
+  <div class="toc-foot">
+    <a class="toc-btn primary" href="prototype.html">打开可点击原型</a>
+    <button class="toc-btn anno-toggle" type="button" aria-pressed="false">标注模式</button>
+  </div>
+</aside>
+
+<main>
+<div class="doc">
+
+  <header class="doc-head">
+    <div class="crumb">SaleCapitAI / 发布流程 / 产品需求文档</div>
+    <h1>AI 主图：上传 1 张实拍照片，生成 4 张可用的主图</h1>
+    <div class="meta">
+      <span>作者 <b>Roy</b></span>
+      <span>版本 <b>v1.0</b></span>
+      <span>更新 <b>2026-11-02</b></span>
+      <span>状态 <span class="pill warn">评审中</span></span>
+      <span>平台 <b>Android / Web</b></span>
+      <span>文中数值 <span class="pill">均为假设目标值或示意数据</span></span>
+    </div>
+  </header>
+
+  <!-- 第 0 章 -->
+  <section class="chapter" id="ch0">
+    <div class="ch-head"><span class="ch-no">第 0 章</span><h2>概览</h2></div>
+    <p class="lead">AI 主图只整理画面，不美化商品。AI 换掉杂乱的背景，商品主体不重绘，实拍原图保留在第 2 张。</p>
+
+    <div class="grid2">
+      <div>
+        <h3>背景</h3>
+        <p>SaleCapitAI 是一个在线交易平台，有 4 个类目：汽车、房产、招聘、通用商品。</p>
+        <p>通用商品的卖家多是个人。他们用手机在家拍照，然后发布。</p>
+        <h3>要解决的问题</h3>
+        <ul class="list">
+          <li><b>背景杂乱</b>：床单、桌面杂物、纸箱入镜，抢走注意力。</li>
+          <li><b>光线差</b>：室内偏暗、偏黄，商品颜色失真。</li>
+          <li><b>构图差</b>：商品太小、歪斜、不在中间。</li>
+          <li><b>修图门槛高</b>：卖家要切换到其他 App 修图。多数卖家不修图。</li>
+        </ul>
+        <p>主图是买家在列表中最先看到的内容。主图质量差，点击率就低。</p>
+      </div>
+      <div>
+        <h3>目标用户</h3>
+        <div class="tbl-wrap"><table class="tbl compact">
+          <tr><th>用户</th><th>特征</th><th>诉求</th></tr>
+          <tr><td><b>个人卖家</b><br><span class="pill main">主要用户</span></td><td>用手机在家拍照，不会修图，偶尔发布</td><td>少操作，快发布，卖得出去</td></tr>
+          <tr><td><b>买家</b><br><span class="pill">受益方</span></td><td>在列表中快速浏览</td><td>看清商品；相信照片是真的</td></tr>
+        </table></div>
+        <h3>功能一句话</h3>
+        <div class="callout"><b>AI 主图</b>：卖家上传 1 张实拍照片，选 1 种风格。AI 一次生成 4 张候选图。卖家挑选、轻编辑，然后设为主图。</div>
+      </div>
+    </div>
+
+    <h3>目标指标（假设目标值）</h3>
+    <div class="tbl-wrap"><table class="tbl">
+      <tr><th>类型</th><th>指标</th><th>定义</th><th>假设目标值</th></tr>
+      <tr><td><span class="pill main">北极星</span></td><td><b>曝光点击率提升</b></td><td>AI 主图商品的点击率 ÷ 实拍主图商品的点击率 − 1（A/B 对照，同类目）</td><td>≥ +15%</td></tr>
+      <tr><td>过程</td><td>生成成功率</td><td>返回 4 张候选图的请求 ÷ 全部生成请求</td><td>≥ 95%</td></tr>
+      <tr><td>过程</td><td>首轮采纳率</td><td>第 1 次生成就选中候选图的用户 ÷ 生成成功的用户</td><td>≥ 55%</td></tr>
+      <tr><td>过程</td><td>P90 等待时长</td><td>从点击「生成」到 4 张全部显示，第 90 百分位</td><td>≤ 20 秒</td></tr>
+      <tr><td>过程</td><td>重试率</td><td>同一张照片生成 ≥ 2 次的用户 ÷ 生成成功的用户</td><td>≤ 30%</td></tr>
+      <tr><td>过程</td><td>生成后发布转化率</td><td>设为主图后完成发布的用户 ÷ 设为主图的用户</td><td>≥ 85%</td></tr>
+      <tr><td>护栏</td><td>成交率、货不对板投诉率</td><td>与对照组比较</td><td>不显著变差</td></tr>
+    </table></div>
+
+    <h3>范围</h3>
+    <div class="grid2">
+      <div class="card"><h4>本期做</h4>
+        <ul class="list">
+          <li>通用商品类目。</li>
+          <li>上传 1 张照片：拍照、从相册选、用已上传的照片。</li>
+          <li>3 种风格：纯白、浅灰、生活场景。一次生成 4 张。</li>
+          <li>挑选：2×2 网格、放大、滑块对比原图、「都不满意」换风格。</li>
+          <li>轻编辑：换纯色背景、调亮度、裁剪 4:3 / 1:1。</li>
+          <li>设为主图或下载。次数规则。「AI 背景」标识。</li>
+        </ul>
+      </div>
+      <div class="card"><h4>本期不做</h4>
+        <ul class="list">
+          <li>汽车类目（下期：只调光和裁剪，不换背景）。</li>
+          <li>房产、招聘类目。房屋照片换背景会构成虚假宣传。</li>
+          <li>节日氛围风格。它会添加装饰，与「不美化」冲突。</li>
+          <li>去除划痕、污渍等局部重绘。</li>
+          <li>模特上身、文字海报、批量处理。</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>与平台现有发布流程衔接</h3>
+    <div class="tbl-wrap"><table class="tbl compact">
+      <tr><th>平台现有规则</th><th>AI 主图怎么做</th></tr>
+      <tr><td>照片：JPEG、PNG、WebP，单张 ≤ 9 MB，每个商品最多 5 张</td><td>输入沿用这条规则。AI 另外要求短边 ≥ 512 px。</td></tr>
+      <tr><td>每张照片先过质检。低质量照片被拒绝，卖家必须换图</td><td>只有通过质检的照片，才能使用 AI 主图。</td></tr>
+      <tr><td>第 1 张是主图；列表卡片是 4:3</td><td>默认输出 4:3。AI 主图排第 1 张，实拍原图排第 2 张。</td></tr>
+      <tr><td>每个商品最多 5 张照片</td><td>AI 主图不计入 5 张名额。</td></tr>
+      <tr><td>近重复照片会被拒绝</td><td>AI 主图和它的原图来自同一张照片，按原图豁免。</td></tr>
+    </table></div>
+
+    <h3>版本记录</h3>
+    <div class="tbl-wrap"><table class="tbl compact">
+      <tr><th>版本</th><th>日期</th><th>作者</th><th>说明</th></tr>
+      <tr><td>v1.0</td><td>2026-11-02</td><td>Roy</td><td>完成第 1–5 章和可点击原型。</td></tr>
+      <tr><td>v0.1</td><td>2026-11-02</td><td>Roy</td><td>审查 v0，采纳 15 处修改。记录见 <a href="https://github.com/XurongLiu/aigc-main-image-prd/blob/main/drafts/review-log.md">drafts/review-log.md</a>。</td></tr>
+      <tr><td>v0</td><td>2026-11-02</td><td>AI</td><td>Claude 子 agent 根据一句 prompt 生成的初稿。见第 4 章。</td></tr>
+    </table></div>
+  </section>
+
+  <!-- 第 1 章 -->
+  <section class="chapter" id="ch1">
+    <div class="ch-head"><span class="ch-no">第 1 章</span><h2>用户路径与模块流程</h2></div>
+    <p class="lead">主路径有 8 步，分 4 个模块。5 类异常单独画出：每类异常都写明系统怎么处理、用户回到哪一步。</p>
+    <aside class="decision"><div class="decision-t">设计决策</div><ol>
+      <li><i>1</i><span>主路径只有 8 步。每个模块只有 1–2 个主操作。编辑是可选步骤，可以跳过。</span></li>
+      <li><i>2</i><span>每个异常都写明回到哪一步。所有异常都可以返回发布页，发布不受影响。</span></li>
+      <li><i>3</i><span>断网不丢进度：上传会续传，生成在服务器继续，成功才扣次数。</span></li>
+    </ol></aside>
+    <div class="flow-wrap">
+<svg class="flow-svg" viewBox="-18 -6 1156 708" role="img" aria-labelledby="flow-t flow-d">
+<title id="flow-t">AI 主图用户路径：4 个模块、8 个步骤、5 类异常分支</title>
+<desc id="flow-d">主路径：进入、上传、选风格、生成、挑选、编辑、设为主图、发布。异常分支：上传校验失败、生成失败或超时、次数用完、内容违规、断网。每个异常写明触发条件、系统表现和回到哪一步。</desc>
+<defs><marker id="arM" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0f6f68"/></marker><marker id="arE" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#c2410c"/></marker><marker id="arD" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0f6f68" opacity=".7"/></marker></defs>
+<rect x="0.0" y="0" width="268.0" height="196" rx="12" fill="#f7f8fa"/>
+<text x="16.0" y="28" font-size="12.5" fill="#646a73" font-weight="500" text-anchor="start">模块 1</text>
+<text x="70.0" y="28" font-size="14.5" fill="#1f2329" font-weight="600" text-anchor="start">上传</text>
+<rect x="284.0" y="0" width="268.0" height="196" rx="12" fill="#f7f8fa"/>
+<text x="300.0" y="28" font-size="12.5" fill="#646a73" font-weight="500" text-anchor="start">模块 2</text>
+<text x="354.0" y="28" font-size="14.5" fill="#1f2329" font-weight="600" text-anchor="start">生成</text>
+<rect x="568.0" y="0" width="268.0" height="196" rx="12" fill="#f7f8fa"/>
+<text x="584.0" y="28" font-size="12.5" fill="#646a73" font-weight="500" text-anchor="start">模块 3</text>
+<text x="638.0" y="28" font-size="14.5" fill="#1f2329" font-weight="600" text-anchor="start">挑选与编辑</text>
+<rect x="852.0" y="0" width="268.0" height="196" rx="12" fill="#f7f8fa"/>
+<text x="868.0" y="28" font-size="12.5" fill="#646a73" font-weight="500" text-anchor="start">模块 4</text>
+<text x="922.0" y="28" font-size="14.5" fill="#1f2329" font-weight="600" text-anchor="start">导出 / 发布</text>
+<rect x="14.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5"/>
+<circle cx="30.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="30.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">1</text>
+<text x="67.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">进入 AI 主图</text>
+<text x="67.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">发布页入口</text>
+<rect x="148.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5"/>
+<circle cx="164.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="164.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">2</text>
+<text x="201.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">选择照片</text>
+<text x="201.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">上传 + 校验</text>
+<rect x="298.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5"/>
+<circle cx="314.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="314.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">3</text>
+<text x="351.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">选风格</text>
+<text x="351.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">3 种风格</text>
+<rect x="432.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5"/>
+<circle cx="448.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="448.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">4</text>
+<text x="485.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">生成中</text>
+<text x="485.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">3 个阶段</text>
+<rect x="582.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5"/>
+<circle cx="598.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="598.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">5</text>
+<text x="635.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">挑选候选图</text>
+<text x="635.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">4 张 · 对比原图</text>
+<rect x="716.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5" stroke-dasharray="5 4"/>
+<circle cx="732.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="732.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">6</text>
+<text x="769.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">轻编辑（可选）</text>
+<text x="769.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">背景 · 亮度 · 裁剪</text>
+<rect x="866.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5"/>
+<circle cx="882.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="882.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">7</text>
+<text x="919.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">设为主图</text>
+<text x="919.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">或下载</text>
+<rect x="1000.0" y="96" width="106" height="66" rx="10" fill="#fff" stroke="#0f6f68" stroke-width="2.5"/>
+<circle cx="1016.0" cy="96" r="10" fill="#0f6f68"/>
+<text x="1016.0" y="100.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">8</text>
+<text x="1053.0" y="126" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="middle">发布商品</text>
+<text x="1053.0" y="146" font-size="11.5" fill="#646a73" font-weight="400" text-anchor="middle">原图保留第 2 张</text>
+<path d="M120.0 129.0H145.0" stroke="#0f6f68" stroke-width="3" marker-end="url(#arM)" fill="none"/>
+<path d="M254.0 129.0H295.0" stroke="#0f6f68" stroke-width="3" marker-end="url(#arM)" fill="none"/>
+<path d="M404.0 129.0H429.0" stroke="#0f6f68" stroke-width="3" marker-end="url(#arM)" fill="none"/>
+<path d="M538.0 129.0H579.0" stroke="#0f6f68" stroke-width="3" marker-end="url(#arM)" fill="none"/>
+<path d="M688.0 129.0H713.0" stroke="#0f6f68" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arD)" fill="none"/>
+<path d="M822.0 129.0H863.0" stroke="#0f6f68" stroke-width="3" marker-end="url(#arM)" fill="none"/>
+<path d="M972.0 129.0H997.0" stroke="#0f6f68" stroke-width="3" marker-end="url(#arM)" fill="none"/>
+<path d="M635.0 96V70H919.0V93" stroke="#0f6f68" stroke-width="3" marker-end="url(#arM)" fill="none"/>
+<text x="777.0" y="64" font-size="11.5" fill="#0f6f68" font-weight="500" text-anchor="middle">不编辑，直接设为主图</text>
+<rect x="162.5" y="153" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="174.5" y="166.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E1</text>
+<rect x="185.0" y="153" width="32" height="18" rx="9" fill="#c2410c"/>
+<text x="201.0" y="166.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E4a</text>
+<rect x="211.5" y="153" width="32" height="18" rx="9" fill="#c2410c"/>
+<text x="227.5" y="166.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E5a</text>
+<rect x="339.0" y="153" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="351.0" y="166.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E3</text>
+<rect x="455.3333333333333" y="153" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="467.3333333333333" y="166.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E2</text>
+<rect x="486.6666666666667" y="153" width="32" height="18" rx="9" fill="#c2410c"/>
+<text x="502.6666666666667" y="166.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E5b</text>
+<rect x="619.0" y="153" width="32" height="18" rx="9" fill="#c2410c"/>
+<text x="635.0" y="166.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E4b</text>
+<path d="M0 228H34" stroke="#0f6f68" stroke-width="3"/>
+<text x="42" y="232.5" font-size="12.5" fill="#646a73" font-weight="400" text-anchor="start">主路径</text>
+<path d="M104 228H138" stroke="#0f6f68" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="146" y="232.5" font-size="12.5" fill="#646a73" font-weight="400" text-anchor="start">可选步骤</text>
+<rect x="222" y="219" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="234" y="232.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E1</text>
+<text x="254" y="232.5" font-size="12.5" fill="#646a73" font-weight="400" text-anchor="start">异常触发点（橙色）</text>
+<circle cx="382" cy="228" r="10" fill="#0f6f68"/>
+<text x="382" y="232.2" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">3</text>
+<text x="398" y="232.5" font-size="12.5" fill="#646a73" font-weight="400" text-anchor="start">回到主路径的第几步</text>
+<text x="1120" y="232.5" font-size="12.5" fill="#1f2329" font-weight="600" text-anchor="end">所有异常都可以「返回发布页」，不使用 AI，发布不受影响。</text>
+<text x="0" y="262" font-size="12.5" fill="#646a73" font-weight="600" text-anchor="start">异常分支</text>
+<text x="166" y="262" font-size="12.5" fill="#646a73" font-weight="600" text-anchor="start">触发条件</text>
+<text x="510" y="262" font-size="12.5" fill="#646a73" font-weight="600" text-anchor="start">系统表现</text>
+<text x="814" y="262" font-size="12.5" fill="#646a73" font-weight="600" text-anchor="start">回到哪一步</text>
+<path d="M0 272H1120" stroke="#dee0e3"/>
+<g class="lane">
+<rect x="0" y="284" width="150" height="72" rx="10" fill="#fff4ec"/>
+<rect x="0" y="284" width="4" height="72" rx="2" fill="#c2410c"/>
+<rect x="16" y="298" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="28" y="311.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E1</text>
+<text x="16" y="338" font-size="14" fill="#c2410c" font-weight="600" text-anchor="start">上传校验失败</text>
+<rect x="166" y="284" width="320" height="72" rx="10" fill="#fff" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="182" y="313" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">格式不是 JPEG / PNG / WebP，或超过 9 MB</text>
+<text x="182" y="337" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">短边 < 512 px、质检不通过、没有商品</text>
+<path d="M486 320.0H507" stroke="#c2410c" stroke-width="2" marker-end="url(#arE)"/>
+<rect x="510" y="284" width="280" height="72" rx="10" fill="#fff4ec" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="526" y="313" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">显示原因和下一步</text>
+<text x="526" y="337" font-size="13" fill="#c2410c" font-weight="600" text-anchor="start">不扣次数</text>
+<path d="M790 320.0H811" stroke="#0f6f68" stroke-width="2" marker-end="url(#arM)"/>
+<rect x="814" y="284" width="306" height="72" rx="10" fill="#eef7f6" stroke="#b9dcd8" stroke-width="1.5"/>
+<circle cx="838" cy="308" r="9.5" fill="#0f6f68"/>
+<text x="838" y="312.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">2</text>
+<text x="856" y="312.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">重拍或换一张照片</text>
+<circle cx="838" cy="332" r="9.5" fill="#0f6f68"/>
+<text x="838" y="336.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">3</text>
+<text x="856" y="336.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">多个主体：点选商品后继续</text>
+</g>
+<g class="lane">
+<rect x="0" y="366" width="150" height="72" rx="10" fill="#fff4ec"/>
+<rect x="0" y="366" width="4" height="72" rx="2" fill="#c2410c"/>
+<rect x="16" y="380" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="28" y="393.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E2</text>
+<text x="16" y="420" font-size="14" fill="#c2410c" font-weight="600" text-anchor="start">生成失败或超时</text>
+<rect x="166" y="366" width="320" height="72" rx="10" fill="#fff" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="182" y="395" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">服务出错</text>
+<text x="182" y="419" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">超过 60 秒没有结果</text>
+<path d="M486 402.0H507" stroke="#c2410c" stroke-width="2" marker-end="url(#arE)"/>
+<rect x="510" y="366" width="280" height="72" rx="10" fill="#fff4ec" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="526" y="395" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">停止生成，说明原因</text>
+<text x="526" y="419" font-size="13" fill="#c2410c" font-weight="600" text-anchor="start">不扣次数</text>
+<path d="M790 402.0H811" stroke="#0f6f68" stroke-width="2" marker-end="url(#arM)"/>
+<rect x="814" y="366" width="306" height="72" rx="10" fill="#eef7f6" stroke="#b9dcd8" stroke-width="1.5"/>
+<circle cx="838" cy="390" r="9.5" fill="#0f6f68"/>
+<text x="838" y="394.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">4</text>
+<text x="856" y="394.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">重试，同一风格</text>
+<circle cx="838" cy="414" r="9.5" fill="#0f6f68"/>
+<text x="838" y="418.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">3</text>
+<text x="856" y="418.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">换个风格；或用原图发布</text>
+</g>
+<g class="lane">
+<rect x="0" y="448" width="150" height="72" rx="10" fill="#fff4ec"/>
+<rect x="0" y="448" width="4" height="72" rx="2" fill="#c2410c"/>
+<rect x="16" y="462" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="28" y="475.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E3</text>
+<text x="16" y="502" font-size="14" fill="#c2410c" font-weight="600" text-anchor="start">次数用完</text>
+<rect x="166" y="448" width="320" height="72" rx="10" fill="#fff" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="182" y="477" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">今日 5 次已用完</text>
+<text x="182" y="501" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">点击「生成」时触发</text>
+<path d="M486 484.0H507" stroke="#c2410c" stroke-width="2" marker-end="url(#arE)"/>
+<rect x="510" y="448" width="280" height="72" rx="10" fill="#fff4ec" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="526" y="477" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">显示恢复时间：明天 00:00</text>
+<text x="526" y="501" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">提供 3 个替代方案</text>
+<path d="M790 484.0H811" stroke="#0f6f68" stroke-width="2" marker-end="url(#arM)"/>
+<rect x="814" y="448" width="306" height="72" rx="10" fill="#eef7f6" stroke="#b9dcd8" stroke-width="1.5"/>
+<circle cx="838" cy="472" r="9.5" fill="#0f6f68"/>
+<text x="838" y="476.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">5</text>
+<text x="856" y="476.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">用今天已生成的图</text>
+<circle cx="838" cy="496" r="9.5" fill="#0f6f68"/>
+<text x="838" y="500.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">8</text>
+<text x="856" y="500.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">用原图发布；编辑不消耗次数</text>
+</g>
+<g class="lane">
+<rect x="0" y="530" width="150" height="72" rx="10" fill="#fff4ec"/>
+<rect x="0" y="530" width="4" height="72" rx="2" fill="#c2410c"/>
+<rect x="16" y="544" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="28" y="557.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E4</text>
+<text x="16" y="584" font-size="14" fill="#c2410c" font-weight="600" text-anchor="start">内容违规</text>
+<rect x="166" y="530" width="320" height="72" rx="10" fill="#fff" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="182" y="559" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">a. 原图含违禁品（在第 2 步）</text>
+<text x="182" y="583" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">b. 结果异常：变形、乱码（在第 5 步）</text>
+<path d="M486 566.0H507" stroke="#c2410c" stroke-width="2" marker-end="url(#arE)"/>
+<rect x="510" y="530" width="280" height="72" rx="10" fill="#fff4ec" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="526" y="559" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">a. 不生成，也不能发布</text>
+<text x="526" y="583" font-size="13" fill="#c2410c" font-weight="600" text-anchor="start">b. 一键反馈，退回 1 次</text>
+<path d="M790 566.0H811" stroke="#0f6f68" stroke-width="2" marker-end="url(#arM)"/>
+<rect x="814" y="530" width="306" height="72" rx="10" fill="#eef7f6" stroke="#b9dcd8" stroke-width="1.5"/>
+<circle cx="838" cy="554" r="9.5" fill="#0f6f68"/>
+<text x="838" y="558.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">2</text>
+<text x="856" y="558.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">a. 换一张符合规则的照片</text>
+<circle cx="838" cy="578" r="9.5" fill="#0f6f68"/>
+<text x="838" y="582.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">3</text>
+<text x="856" y="582.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">b. 换个风格重新生成</text>
+</g>
+<g class="lane">
+<rect x="0" y="612" width="150" height="72" rx="10" fill="#fff4ec"/>
+<rect x="0" y="612" width="4" height="72" rx="2" fill="#c2410c"/>
+<rect x="16" y="626" width="24" height="18" rx="9" fill="#c2410c"/>
+<text x="28" y="639.3" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">E5</text>
+<text x="16" y="666" font-size="14" fill="#c2410c" font-weight="600" text-anchor="start">断网</text>
+<rect x="166" y="612" width="320" height="72" rx="10" fill="#fff" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="182" y="641" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">a. 上传中断网（在第 2 步）</text>
+<text x="182" y="665" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">b. 生成中断网（在第 4 步）</text>
+<path d="M486 648.0H507" stroke="#c2410c" stroke-width="2" marker-end="url(#arE)"/>
+<rect x="510" y="612" width="280" height="72" rx="10" fill="#fff4ec" stroke="#f2c3a4" stroke-width="1.5"/>
+<text x="526" y="641" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">a. 暂停，恢复后自动续传</text>
+<text x="526" y="665" font-size="13" fill="#c2410c" font-weight="600" text-anchor="start">b. 服务器继续生成；成功才扣</text>
+<path d="M790 648.0H811" stroke="#0f6f68" stroke-width="2" marker-end="url(#arM)"/>
+<rect x="814" y="612" width="306" height="72" rx="10" fill="#eef7f6" stroke="#b9dcd8" stroke-width="1.5"/>
+<circle cx="838" cy="636" r="9.5" fill="#0f6f68"/>
+<text x="838" y="640.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">2</text>
+<text x="856" y="640.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">a. 网络恢复后继续上传</text>
+<circle cx="838" cy="660" r="9.5" fill="#0f6f68"/>
+<text x="838" y="664.2" font-size="11.5" fill="#fff" font-weight="700" text-anchor="middle">5</text>
+<text x="856" y="664.6" font-size="13" fill="#1f2329" font-weight="400" text-anchor="start">b. 网络恢复后显示结果</text>
+</g>
+<g class="svg-anno"><rect x="4" y="52" width="1112" height="130" rx="12" fill="none" stroke="#e53935" stroke-width="2.5"/><circle cx="6" cy="54" r="13" fill="#e53935" stroke="#fff" stroke-width="2"/><text x="6" y="58.8" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">1</text></g>
+<g class="svg-anno"><rect x="808" y="278" width="308" height="412" rx="12" fill="none" stroke="#e53935" stroke-width="2.5"/><circle cx="810" cy="280" r="13" fill="#e53935" stroke="#fff" stroke-width="2"/><text x="810" y="284.8" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">2</text></g>
+<g class="svg-anno"><rect x="2" y="607" width="800" height="82" rx="12" fill="none" stroke="#e53935" stroke-width="2.5"/><circle cx="4" cy="609" r="13" fill="#e53935" stroke="#fff" stroke-width="2"/><text x="4" y="613.8" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">3</text></g>
+</svg>
+    </div>
+    <div class="flow-notes">
+      <div class="card soft"><h4>为什么入口在发布页</h4><p class="small muted">卖家在上传照片时最需要主图。入口放在第 1 张照片上，不增加新的导航层级。</p></div>
+      <div class="card soft"><h4>为什么先选风格再生成</h4><p class="small muted">1 次生成 = 4 张同一风格的图。先选风格，4 张之间才可比较，挑选更快。</p></div>
+      <div class="card soft"><h4>为什么失败不阻塞发布</h4><p class="small muted">AI 主图是增强功能。原图已通过质检，任何时候都可以直接发布。</p></div>
+    </div>
+  </section>
+
+  <!-- 第 2 章 -->
+  <section class="chapter" id="ch2">
+    <div class="ch-head"><span class="ch-no">第 2 章</span><h2>核心页面多状态</h2></div>
+    <p class="lead">AIGC 产品的 UX 难点在「等待」和「挑选」。下面 7 个状态覆盖上传、等待、失败、挑选和次数用完。<a href="prototype.html">在可点击原型中逐个查看 →</a></p>
+    <aside class="decision"><div class="decision-t">设计决策</div><ol>
+      <li><i>1</i><span>等待：用 3 个阶段代替假的百分比。生成时间不稳定，假进度条会在 99% 停住，损害信任。</span></li>
+      <li><i>2</i><span>失败：明确写出「本次未扣次数」。用户不担心损失，才愿意重试。</span></li>
+      <li><i>3</i><span>挑选：用滑块对比原图。AI 图好看，不等于商品没有变形。</span></li>
+    </ol></aside>
+    <div class="states">
+      <div class="state"><div class="ph-slot" data-screen="empty" data-fit="0.64"></div>
+        <div class="state-cap"><div class="t"><span class="n">1</span>默认 / 空状态</div><p>用 3 个要点和正误示例，引导拍出好照片。写明格式和尺寸要求。</p></div></div>
+      <div class="state"><div class="ph-slot" data-screen="uploading" data-fit="0.64"></div>
+        <div class="state-cap"><div class="t"><span class="n">2</span>上传中</div><p>显示 3 个步骤和真实进度。可以取消。断网时暂停，恢复后续传。</p></div></div>
+      <div class="state"><div class="ph-slot" data-screen="uploadFail" data-state='{"reason":"quality"}' data-fit="0.64"></div>
+        <div class="state-cap"><div class="t"><span class="n">3</span>上传校验失败</div><p>写明原因（平台质检：过暗）和 3 个下一步。不扣次数。</p></div></div>
+      <div class="state"><div class="ph-slot" data-screen="generating" data-state='{"stage":1,"ready":0}' data-anno-map='{"stages":"1:bl"}' data-fit="0.64"></div>
+        <div class="state-cap"><div class="t"><span class="n">4</span>生成中 <span class="pill main">等待</span></div><p>3 个阶段 + 预计时间。可以取消，不扣次数。可以离开，完成后通知。</p></div></div>
+      <div class="state"><div class="ph-slot" data-screen="generateFail" data-anno-map='{"nocharge":2}' data-fit="0.64"></div>
+        <div class="state-cap"><div class="t"><span class="n">5</span>生成失败兜底 <span class="pill main">等待</span></div><p>明确告知「本次未扣次数」。提供重试、换风格、用原图发布。</p></div></div>
+      <div class="state"><div class="ph-slot" data-screen="results" data-state='{"quota":4}' data-anno-map='{"compare":3}' data-fit="0.64"></div>
+        <div class="state-cap"><div class="t"><span class="n">6</span>结果对比挑选 <span class="pill main">挑选</span></div><p>2×2 网格一屏看完。滑块对比原图。都不满意时换风格，并收集原因。</p></div></div>
+      <div class="state"><div class="ph-slot" data-screen="quotaEmpty" data-state='{"quota":0}' data-fit="0.64"></div>
+        <div class="state-cap"><div class="t"><span class="n">7</span>次数用完</div><p>写明恢复时间。提供 3 个不消耗次数的替代方案。</p></div></div>
+      <div class="insight">
+        <h4>AIGC 的 UX 难点：等待和挑选</h4>
+        <div class="sub">普通功能点了就有结果。AI 生成要等，结果还不确定。</div>
+        <dl>
+          <dt>等待 <span>状态 2 · 4 · 5</span></dt>
+          <dd>生成时间不稳定（假设 5–60 秒）。所以显示真实阶段和预计时间，允许离开，完成后通知。</dd>
+          <dt>挑选 <span>状态 6</span></dt>
+          <dd>用户要判断两件事：哪张好看，商品有没有被改。所以一屏放 4 张，并默认展开原图对比。</dd>
+          <dt>失败是常态 <span>状态 3 · 5 · 7</span></dt>
+          <dd>每个失败都写明原因、下一步和「不扣次数」。用户不卡住，也不吃亏。</dd>
+        </dl>
+        <a href="prototype.html">打开可点击原型 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第 3 章 -->
+  <section class="chapter" id="ch3">
+    <div class="ch-head"><span class="ch-no">第 3 章</span><h2>交互标注与边界异常</h2></div>
+    <p class="lead">先标注关键页面「结果挑选」的 7 个交互点，再列出 16 个边界和异常场景。</p>
+    <aside class="decision"><div class="decision-t">设计决策</div><ol>
+      <li><i>1</i><span>次数只在生成成功时扣。失败、超时、取消、排队、已反馈的异常，都不扣。</span></li>
+      <li><i>2</i><span>每条文案都写明原因和下一步，不只写「出错了」。</span></li>
+      <li><i>3</i><span>每个场景都有埋点。上线后可以定位用户在哪一步流失。</span></li>
+    </ol></aside>
+    <div class="anno-fig">
+      <div class="anno-on"><div class="ph-slot" data-screen="results" data-state='{"quota":4,"sel":0}' data-anno-map='{"meta":"1:r","grid":"2:tr","selected":3,"compare":4,"dislike":"5:r","feedback":"6:l","primary":7}' data-fit="0.74"></div></div>
+      <div>
+        <div class="anno-title"><b>关键页面：结果挑选</b><span class="small muted">红框编号对应右侧说明</span></div>
+        <ol class="anno-notes" style="margin-top:22px">
+          <li><span class="b">1</span><div><b>消耗说明</b><span>写明「消耗 1 次」。右上角显示今日剩余次数。用户知道次数用在哪里。</span></div></li>
+          <li><span class="b">2</span><div><b>2×2 网格</b><span>4 张一屏可见，不用滑动。点击任一张即选中。</span></div></li>
+          <li><span class="b">3</span><div><b>选中状态</b><span>描边 + 对勾。默认选中第 1 张，用户可以直接设为主图。</span></div></li>
+          <li><span class="b">4</span><div><b>对比原图</b><span>拖动滑块，检查颜色、形状和划痕。点「放大查看」进入全屏对比。</span></div></li>
+          <li><span class="b">5</span><div><b>都不满意</b><span>打开底部面板：选原因，换风格，重新生成。原因数据用于改进 AI。</span></div></li>
+          <li><span class="b">6</span><div><b>结果有问题</b><span>反馈商品变形或文字乱码。本次退回 1 次。</span></div></li>
+          <li><span class="b">7</span><div><b>设为主图</b><span>主操作在右下角，编辑是次操作。设为主图后，实拍原图排第 2 张，不占 5 张名额。</span></div></li>
+        </ol>
+        <div class="callout" style="margin-top:22px"><b>扣次数规则</b>：每天免费 5 次。1 次 = 生成 4 张。只有返回 4 张候选图时，才扣 1 次。</div>
+      </div>
+    </div>
+
+    <h3>边界与异常场景</h3>
+    <div class="tbl-wrap"><table class="tbl edge">
+      <colgroup><col style="width:108px"><col style="width:168px"><col style="width:176px"><col><col style="width:104px"><col style="width:226px"></colgroup>
+      <tr><th>场景</th><th>触发条件</th><th>系统表现</th><th class="ar" data-anno="2">用户看到的文案</th><th class="c ar" data-anno="1">扣次数</th><th class="ar" data-anno="3">对应埋点</th></tr>
+      <tr class="grp"><td colspan="6">模块 1 · 上传</td></tr>
+      <tr><td><b>格式不支持</b></td><td>文件不是 JPEG、PNG、WebP（如 HEIC）</td><td>不上传，停留在当前页</td><td class="q">「不支持 HEIC 格式。请在相机设置中选择「兼容性最佳」，或导出为 JPEG。」</td><td class="c no">否</td><td><code>ai_image_upload_fail</code><br>reason=format</td></tr>
+      <tr><td><b>文件过大</b></td><td>单张 &gt; 9 MB</td><td>不上传</td><td class="q">「照片超过 9 MB。请在相机设置中降低照片尺寸，或换一张照片。」</td><td class="c no">否</td><td><code>ai_image_upload_fail</code><br>reason=size</td></tr>
+      <tr><td><b>分辨率过低</b></td><td>短边 &lt; 512 px</td><td>上传后拒绝</td><td class="q">「照片太小，主图会模糊。请用手机相机直接拍照。」</td><td class="c no">否</td><td><code>ai_image_upload_fail</code><br>reason=resolution</td></tr>
+      <tr><td><b>质检不通过</b></td><td>平台质检：模糊、过暗、过曝</td><td>不进入生成，沿用平台的换图要求</td><td class="q">「照片偏暗，无法生成。请移到窗边，或打开室内灯。」</td><td class="c no">否</td><td><code>ai_image_upload_fail</code><br>reason=quality_*</td></tr>
+      <tr><td><b>识别不到商品</b></td><td>画面中没有清楚的主体</td><td>不进入生成</td><td class="q">「没有识别到商品。请把商品放在画面中间，再拍 1 张。」</td><td class="c no">否</td><td><code>ai_image_upload_fail</code><br>reason=no_subject</td></tr>
+      <tr><td><b>多个主体</b></td><td>识别到 ≥ 2 件物品</td><td>让用户点选要保留的商品</td><td class="q">「照片里有 2 件物品。请点选要保留的商品。」</td><td class="c no">否</td><td><code>ai_image_subject_pick</code></td></tr>
+      <tr><td><b>上传中断网</b></td><td>上传时网络断开</td><td>暂停上传；恢复后自动续传</td><td class="q">「网络已断开。上传已暂停，恢复后自动继续。」</td><td class="c no">否</td><td><code>ai_image_upload_fail</code><br>reason=offline</td></tr>
+      <tr><td><b>上传图违规</b></td><td>原图含违禁品</td><td>不生成；这张照片也不能发布</td><td class="q">「这张照片不能用于发布。请查看发布规则，换一张照片。」</td><td class="c no">否</td><td><code>ai_image_upload_fail</code><br>reason=policy</td></tr>
+      <tr class="grp"><td colspan="6">模块 2 · 生成</td></tr>
+      <tr><td><b>重复点击「生成」</b></td><td>1 秒内点击多次</td><td>第 1 次点击后按钮置灰；只发送 1 个请求</td><td class="q">按钮文字变为「生成中…」</td><td class="c">只扣 1 次</td><td><code>ai_image_generate_start</code><br>按 request_id 去重</td></tr>
+      <tr><td><b>服务端排队</b></td><td>请求数超过容量</td><td>显示排队位置和预计时间；可以取消</td><td class="q">「排队中，前面还有 12 人。预计 40 秒后开始生成。」</td><td class="c no">否</td><td><code>ai_image_generate_result</code><br>queue_ms</td></tr>
+      <tr><td><b>生成中断网</b></td><td>生成时网络断开</td><td>服务器继续生成；恢复后拉取结果</td><td class="q">「网络已断开。生成会在服务器继续，恢复后显示结果。」</td><td class="c">成功才扣</td><td><code>ai_image_generate_result</code><br>offline=true</td></tr>
+      <tr><td><b>生成超时</b></td><td>超过 60 秒没有结果</td><td>停止生成；提供重试和换风格</td><td class="q">「这次没有生成成功。原因：生成时间超过 60 秒。本次未扣次数。」</td><td class="c no">否</td><td><code>ai_image_generate_result</code><br>status=timeout</td></tr>
+      <tr><td><b>用户取消</b></td><td>生成中点击「取消」</td><td>停止生成</td><td class="q">「已取消。本次不扣次数。」</td><td class="c no">否</td><td><code>ai_image_cancel</code><br>stage</td></tr>
+      <tr><td><b>离开页面</b></td><td>生成中切换页面或退出 App</td><td>后台继续生成；完成后发通知</td><td class="q">「AI 主图已生成（4 张）。点击查看。」</td><td class="c">成功才扣</td><td><code>ai_image_notify_open</code></td></tr>
+      <tr><td><b>次数用完</b></td><td>今日剩余 0 次时点击「生成」</td><td>不发送请求；显示替代方案</td><td class="q">「今天的 5 次已用完。明天 00:00 恢复 5 次。」</td><td class="c">—</td><td><code>ai_image_quota_empty</code></td></tr>
+      <tr class="grp"><td colspan="6">模块 3 · 挑选与编辑</td></tr>
+      <tr><td><b>生成结果异常</b></td><td>商品变形、文字乱码</td><td>用户点「结果有问题」；退回 1 次</td><td class="q">「已收到反馈。本次退回 1 次。」</td><td class="c no">否（退回）</td><td><code>ai_image_feedback</code><br>type, refunded</td></tr>
+    </table></div>
+  </section>
+
+  <!-- 第 4 章 -->
+  <section class="chapter" id="ch4">
+    <div class="ch-head"><span class="ch-no">第 4 章</span><h2>AI 初稿 vs 我的修改</h2></div>
+    <p class="lead">我先用 AI 生成初稿（v0），再逐条审查。共找到 15 处问题，全部修改。下面是最有代表性的 5 处。</p>
+    <aside class="decision"><div class="decision-t">设计决策</div><ol>
+      <li><i>1</i><span>左侧是 v0 原文，原样摘录，并标出所在章节。</span></li>
+      <li><i>2</i><span>中间写 3 件事：发现的问题、为什么是问题、改成了什么。</span></li>
+      <li><i>3</i><span>不盲目采用 AI 写的「事实」：v0 中标为「现有」的埋点和审核，逐条和平台核对过。</span></li>
+    </ol></aside>
+    <div class="prov">
+      <div class="card soft"><h4>v0 怎么来</h4><p class="small muted" style="margin:0">Prompt 只有一句：「帮我写一个二手交易平台"AI 一键商品主图"功能的 PRD。」由一个 Claude 子 agent 生成。它能读取 capstone 仓库的文档。原文见 <a href="https://github.com/XurongLiu/aigc-main-image-prd/blob/main/drafts/v0-ai-draft.md">drafts/v0-ai-draft.md</a>（公开版删去了 5 处 capstone 内部细节）。</p></div>
+      <div class="card soft"><h4>v0 做对了什么（保留，不算我的修改）</h4><p class="small muted" style="margin:0">定位「整理画面，不美化商品」；主体不重绘；原图必须保留；AI 图必须带标识；生成失败不阻塞发布。15 处修改的完整清单见 <a href="https://github.com/XurongLiu/aigc-main-image-prd/blob/main/drafts/review-log.md">drafts/review-log.md</a>。</p></div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-h"><span class="pill exc">修改 1</span>没有设计「等待」<span class="k">审查清单 #1</span></div>
+      <div class="diff-b">
+        <div class="v0 ar" data-anno="1"><span class="lbl">v0 原文</span>
+          <blockquote>点击到 3 张候选全部可见：P50 ≤ 4 秒、P95 ≤ 8 秒（建议）；候选逐张展示，不等齐</blockquote>
+          <div class="src">第 8 节 非功能需求 · 时延</div></div>
+        <div class="why ar" data-anno="2"><dl>
+          <dt>问题</dt><dd>只有时延目标，没有「生成中」页面的状态。</dd>
+          <dt>为什么是问题</dt><dd>生成时间不稳定。没有进度反馈，用户会重复点击或离开。</dd>
+          <dt class="fix">改成</dt><dd>3 个阶段 + 预计时间 + 可取消 + 可离开后通知。</dd></dl></div>
+        <div class="v1"><span class="lbl">修改后</span><ul>
+          <li>显示 3 个阶段：识别商品 → 生成背景 → 合成与校验。不显示百分比。</li>
+          <li>显示预计剩余时间。</li>
+          <li>用户可以取消。取消不扣次数。</li>
+          <li>用户可以离开页面。生成完成后发通知。</li>
+          <li>P90 等待时长 ≤ 20 秒（假设目标值）。超过 60 秒按失败处理。</li></ul></div>
+      </div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-h"><span class="pill exc">修改 2</span>额度规则不完整<span class="k">审查清单 #3</span></div>
+      <div class="diff-b">
+        <div class="v0"><span class="lbl">v0 原文</span>
+          <blockquote>每次生成 3 张不同背景的候选；“换一批”每件商品每天 ≤ 5 次（建议）</blockquote>
+          <blockquote>超限后按钮置灰并提示原因</blockquote>
+          <div class="src">第 6 节 功能需求 · F9 候选与换一批</div></div>
+        <div class="why"><dl>
+          <dt>问题</dt><dd>只限制了「换一批」。没有写什么情况扣次数，也没有「次数用完」状态。</dd>
+          <dt>为什么是问题</dt><dd>规则不清楚，用户会以为失败也扣次数，就不再使用。</dd>
+          <dt class="fix">改成</dt><dd>写明扣与不扣的条件，并设计「次数用完」状态。</dd></dl></div>
+        <div class="v1"><span class="lbl">修改后</span><ul>
+          <li>每天免费 5 次。1 次 = 生成 4 张候选图。</li>
+          <li>只有生成成功时，才扣 1 次。</li>
+          <li>生成失败、超时、用户取消、已反馈的异常结果，不扣次数。</li>
+          <li>次数用完时，显示恢复时间（明天 00:00），并提供「用原图发布」。</li></ul></div>
+      </div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-h"><span class="pill exc">修改 3</span>质检规则与平台冲突<span class="k">审查清单 #7</span></div>
+      <div class="diff-b">
+        <div class="v0"><span class="lbl">v0 原文</span>
+          <blockquote>输入图质量不达标时提示具体原因（如“画面偏暗，建议靠近窗边重拍”），卖家仍可选择继续生成</blockquote>
+          <blockquote>提示文案与质检标签一一对应；不强制拦截</blockquote>
+          <div class="src">第 6 节 功能需求 · F3 生成前质检</div></div>
+        <div class="why"><dl>
+          <dt>问题</dt><dd>v0 对低质量照片「只提示，不拦截」。SaleCapitAI 现在会拒绝低质量照片，卖家必须换图。</dd>
+          <dt>为什么是问题</dt><dd>两条规则同时存在，卖家会看到矛盾的提示。</dd>
+          <dt class="fix">改成</dt><dd>AI 主图服从平台现有规则。</dd></dl></div>
+        <div class="v1"><span class="lbl">修改后</span><ul>
+          <li>只有通过平台质检的照片，才能使用 AI 主图。</li>
+          <li>如果质检不通过，则不进入生成。沿用平台的提示：写明原因，要求换图。</li>
+          <li>本次不扣次数。</li></ul></div>
+      </div>
+    </div>
+
+    <div class="diff ar" data-anno="3">
+      <div class="diff-h"><span class="pill exc">修改 4</span>把不存在的能力写成「现有」<span class="k">审查清单 #9</span></div>
+      <div class="diff-b">
+        <div class="v0"><span class="lbl">v0 原文</span>
+          <blockquote><code>listing_publish</code>（现有） | 发布商品 | 新增 <code>cover_is_ai</code>、<code>cover_edit_type</code></blockquote>
+          <blockquote><code>after_sale_ticket_create</code>（现有） | 发起售后 | 新增 <code>cover_is_ai</code>、纠纷原因</blockquote>
+          <blockquote>生成前对原图、发布前对 AI 图各走一次现有审核</blockquote>
+          <div class="src">第 9 节 埋点表；第 7 节 真实性与合规 · 内容审核</div></div>
+        <div class="why"><dl>
+          <dt>问题</dt><dd>这些事件在 capstone 中不存在。平台没有自动的图片内容审核，只有用户举报。</dd>
+          <dt>为什么是问题</dt><dd>错误的事实会误导开发和评审。AI 写的「现有能力」必须逐条核对。</dd>
+          <dt class="fix">改成</dt><dd>删除「现有」标注，改为新需求。</dd></dl></div>
+        <div class="v1"><span class="lbl">修改后</span><ul>
+          <li>埋点统一使用新事件 <code>ai_image_*</code>，例如 <code>ai_image_publish</code>（is_ai_cover、round）。见第 5 章。</li>
+          <li>图片内容审核写为新需求：如果原图违规，则不生成，这张照片也不能发布。</li></ul></div>
+      </div>
+    </div>
+
+    <div class="diff">
+      <div class="diff-h"><span class="pill exc">修改 5</span>语言不简洁<span class="k">审查清单 #15</span></div>
+      <div class="diff-b">
+        <div class="v0"><span class="lbl">v0 原文</span>
+          <blockquote>保真度校验不过时只给“调光 + 裁剪”的候选；超时、服务不可用或卖家放弃时都回到原图，发布不受影响。</blockquote>
+          <div class="src">第 5 节 用户流程</div></div>
+        <div class="why"><dl>
+          <dt>问题</dt><dd>一句话有 4 个条件和 2 个结果。同一事物有多个名称：主图、AI 主图、候选、生成图。</dd>
+          <dt>为什么是问题</dt><dd>评审要快速读懂。术语不统一会产生歧义。</dd>
+          <dt class="fix">改成</dt><dd>参考 ASD-STE100：一句一个意思，先写条件再写动作，一个事物只用一个名称。</dd></dl></div>
+        <div class="v1"><span class="lbl">修改后</span>
+          <p>如果保真度校验不通过，则只提供调光和裁剪的结果。</p>
+          <p>如果生成超时或服务不可用，则保留原图。</p>
+          <p>如果卖家放弃，则保留原图。</p>
+          <p>以上情况，卖家都可以继续发布。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第 5 章 -->
+  <section class="chapter" id="ch5">
+    <div class="ch-head"><span class="ch-no">第 5 章</span><h2>埋点与漏斗</h2></div>
+    <p class="lead">漏斗按第 1 章的 4 个模块分段。按示意数据，最可能流失的环节是「生成成功 → 选中」。</p>
+    <aside class="decision"><div class="decision-t">设计决策</div><ol>
+      <li><i>1</i><span>漏斗按 4 个模块分段，和第 1 章的流程一一对应。</span></li>
+      <li><i>2</i><span>标出流失最大的环节，集中精力优化这一步。</span></li>
+      <li><i>3</i><span>每个优化假设都写明验证方法：用哪个埋点、比较什么。</span></li>
+    </ol></aside>
+    <div class="funnel-box">
+      <div class="funnel-card ar" data-anno="1">
+        <h4>AI 主图漏斗</h4>
+        <div class="sub"><span class="pill warn">示意数据</span> 非真实数据，用来说明分析方法。单位：用户数（7 天）。</div>
+<svg class="funnel-svg" viewBox="0 0 640 312" role="img" aria-labelledby="fn-t">
+<title id="fn-t">AI 主图漏斗（示意数据）：进入 10,000，上传成功 7,400，生成成功 7,030，选中候选图 4,220，发布或下载 3,800</title>
+<g class="frow" data-name="进入 AI 主图" data-v="10,000" data-prev="100%" data-tot="100%">
+<text x="112" y="27" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="end">进入 AI 主图</text>
+<text x="112" y="44" font-size="11.5" fill="#8f959e" text-anchor="end">模块 1</text>
+<path class="bar" d="M124 14H540.0a4 4 0 0 1 4 4V38a4 4 0 0 1 -4 4H124z"/>
+<text x="552.0" y="33" font-size="13.5" fill="#1f2329" font-weight="600">10,000</text>
+<rect class="hit" x="0" y="8" width="640" height="52"/>
+</g>
+<text x="124" y="63" font-size="12" fill="#646a73" font-weight="400">↓ 流失 2,600（26%）</text>
+<g class="frow" data-name="上传成功" data-v="7,400" data-prev="74%" data-tot="74%">
+<text x="112" y="87" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="end">上传成功</text>
+<text x="112" y="104" font-size="11.5" fill="#8f959e" text-anchor="end">模块 1</text>
+<path class="bar" d="M124 74H430.8a4 4 0 0 1 4 4V98a4 4 0 0 1 -4 4H124z"/>
+<text x="442.8" y="93" font-size="13.5" fill="#1f2329" font-weight="600">7,400</text>
+<rect class="hit" x="0" y="68" width="640" height="52"/>
+</g>
+<text x="124" y="123" font-size="12" fill="#646a73" font-weight="400">↓ 流失 370（5%）</text>
+<g class="frow" data-name="生成成功" data-v="7,030" data-prev="95%" data-tot="70%">
+<text x="112" y="147" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="end">生成成功</text>
+<text x="112" y="164" font-size="11.5" fill="#8f959e" text-anchor="end">模块 2</text>
+<path class="bar" d="M124 134H415.26a4 4 0 0 1 4 4V158a4 4 0 0 1 -4 4H124z"/>
+<text x="427.26" y="153" font-size="13.5" fill="#1f2329" font-weight="600">7,030</text>
+<rect class="hit" x="0" y="128" width="640" height="52"/>
+</g>
+<text x="124" y="183" font-size="12" fill="#c2410c" font-weight="700">↓ 流失 2,810（40%）  ← 流失最大</text>
+<g class="frow" data-name="选中候选图" data-v="4,220" data-prev="60%" data-tot="42%">
+<text x="112" y="207" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="end">选中候选图</text>
+<text x="112" y="224" font-size="11.5" fill="#8f959e" text-anchor="end">模块 3</text>
+<path class="bar" d="M124 194H297.24a4 4 0 0 1 4 4V218a4 4 0 0 1 -4 4H124z"/>
+<text x="309.24" y="213" font-size="13.5" fill="#1f2329" font-weight="600">4,220</text>
+<rect class="hit" x="0" y="188" width="640" height="52"/>
+</g>
+<text x="124" y="243" font-size="12" fill="#646a73" font-weight="400">↓ 流失 420（10%）</text>
+<g class="frow" data-name="发布或下载" data-v="3,800" data-prev="90%" data-tot="38%">
+<text x="112" y="267" font-size="13.5" fill="#1f2329" font-weight="600" text-anchor="end">发布或下载</text>
+<text x="112" y="284" font-size="11.5" fill="#8f959e" text-anchor="end">模块 4</text>
+<path class="bar" d="M124 254H279.6a4 4 0 0 1 4 4V278a4 4 0 0 1 -4 4H124z"/>
+<text x="291.6" y="273" font-size="13.5" fill="#1f2329" font-weight="600">3,800</text>
+<rect class="hit" x="0" y="248" width="640" height="52"/>
+</g>
+</svg>
+        <p class="small muted" style="margin:8px 0 0">整体转化：进入 → 发布或下载 = 38%（示意）。悬停在条形上可查看每一步的转化率。</p>
+        <div class="ftip" role="status"></div>
+      </div>
+      <div class="hyp">
+        <div class="card ar" data-anno="2" style="border-color:#f2c3a4;background:#fff8f3">
+          <h4><span class="pill exc">流失最大</span>生成成功 → 选中：流失 40%</h4>
+          <p class="small muted" style="margin:0">用户已经等完生成，却没有选中任何一张。这一步的流失，说明结果没有满足预期。</p>
+        </div>
+        <div class="card ar" data-anno="3">
+          <h4>优化假设</h4>
+          <div class="row"><b>H1</b><span><b style="color:#1f2329">默认风格不合适。</b>改法：按类目推荐默认风格。验证：A/B 测试，比较首轮采纳率。</span></div>
+          <div class="row" style="margin-top:8px"><b>H2</b><span><b style="color:#1f2329">担心商品被改。</b>改法：默认展开原图对比。验证：比较使用 <code>ai_image_compare</code> 和未使用的用户的选中率。</span></div>
+          <div class="row" style="margin-top:8px"><b>H3</b><span><b style="color:#1f2329">4 张差别太小。</b>改法：4 张使用不同的光线方向和构图。验证：看 <code>ai_image_dislike</code> 的原因分布。</span></div>
+        </div>
+        <div class="card soft">
+          <h4>第二大流失：进入 → 上传成功（26%）</h4>
+          <p class="small muted" style="margin:0">假设：重新拍照的门槛高。改法：支持「用已上传的照片」。验证：按 <code>ai_image_upload</code> 的 source 比较上传成功率。</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>埋点事件</h3>
+    <div class="tbl-wrap"><table class="tbl compact">
+      <tr><th>模块</th><th>事件名</th><th>触发时机</th><th>关键属性</th></tr>
+      <tr><td rowspan="3">1 上传</td><td><code>ai_image_entry_view</code></td><td>入口按钮曝光</td><td>page（发布 / 编辑）、category</td></tr>
+      <tr><td><code>ai_image_upload</code></td><td>上传完成并通过校验</td><td>source（拍照 / 相册 / 已上传）、file_size、width、height</td></tr>
+      <tr><td><code>ai_image_upload_fail</code></td><td>上传或校验失败</td><td>reason（format / size / resolution / quality_* / no_subject / policy / offline）</td></tr>
+      <tr><td rowspan="5">2 生成</td><td><code>ai_image_generate_start</code></td><td>点击「生成」</td><td>style、quota_left、request_id、round（第几轮）</td></tr>
+      <tr><td><code>ai_image_generate_result</code></td><td>生成结束</td><td>status（success / fail / timeout）、duration_ms、queue_ms、style、stage_reached、offline</td></tr>
+      <tr><td><code>ai_image_cancel</code></td><td>用户取消生成</td><td>stage（停在第几阶段）、waited_ms</td></tr>
+      <tr><td><code>ai_image_notify_open</code></td><td>点击完成通知</td><td>delay_ms（完成到点击的时长）</td></tr>
+      <tr><td><code>ai_image_quota_empty</code></td><td>次数用完时点击「生成」</td><td>has_results（今天是否已有候选图）</td></tr>
+      <tr><td rowspan="5">3 挑选与编辑</td><td><code>ai_image_select</code></td><td>选中候选图</td><td>candidate_index、round、style</td></tr>
+      <tr><td><code>ai_image_compare</code></td><td>拖动对比滑块</td><td>candidate_index、fullscreen</td></tr>
+      <tr><td><code>ai_image_dislike</code></td><td>提交「都不满意」</td><td>reasons、next_style</td></tr>
+      <tr><td><code>ai_image_feedback</code></td><td>反馈结果异常</td><td>type（deform / garbled / other）、refunded</td></tr>
+      <tr><td><code>ai_image_edit</code></td><td>轻编辑</td><td>action（background / brightness / crop）、value</td></tr>
+      <tr><td rowspan="2">4 导出 / 发布</td><td><code>ai_image_publish</code></td><td>设为主图后发布商品</td><td>is_ai_cover、round、crop、time_to_publish_ms</td></tr>
+      <tr><td><code>ai_image_download</code></td><td>下载候选图</td><td>crop、candidate_index</td></tr>
+    </table></div>
+    <p class="small muted">漏斗口径：进入 = <code>ai_image_entry_view</code> 后进入 AI 主图页；上传成功 = <code>ai_image_upload</code>；生成成功 = <code>ai_image_generate_result</code>（status=success）；选中 = <code>ai_image_select</code>；发布或下载 = <code>ai_image_publish</code> 或 <code>ai_image_download</code>。同一用户 7 天内去重。</p>
+  </section>
+
+</div>
+</main>
+
+<script src="assets/js/art.js"></script>
+<script src="assets/js/screens.js"></script>
+<script src="assets/js/prd.js"></script>
+</body>
+</html>

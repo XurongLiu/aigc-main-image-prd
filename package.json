@@ -1,0 +1,11 @@
+{
+  "name": "aigc-main-image-prd",
+  "private": true,
+  "description": "只用于本地截图。页面本身不需要构建，直接打开 index.html。",
+  "scripts": {
+    "screenshot": "node scripts/screenshot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
