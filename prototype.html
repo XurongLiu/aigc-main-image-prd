@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 主图原型 · SaleCapitAI</title>
+<meta name="description" content="SaleCapitAI「AI 主图」可点击原型：主路径从上传到设为主图，侧边切换器可一键切到每个状态和异常。">
+<link rel="stylesheet" href="assets/css/phone.css">
+<link rel="stylesheet" href="assets/css/prototype.css">
+</head>
+<body>
+<div class="proto">
+  <section class="intro">
+    <a class="back" href="index.html">← 返回 PRD</a>
+    <h1>AI 主图 · 可点击原型</h1>
+    <p>主路径可以从头点到尾：发布页 → AI 主图 → 上传 → 选风格 → 生成中 → 挑选 → 编辑 → 设为主图。</p>
+    <ol class="how">
+      <li>点击手机里的按钮，走主路径。</li>
+      <li>用切换器直接打开任一状态或异常。切换器在右侧；手机上在下方。</li>
+      <li>下方说明这个状态的设计决策。</li>
+    </ol>
+    <div class="now">
+      <div class="now-t">当前状态</div>
+      <div class="now-name" id="now-name">发布页</div>
+      <p class="now-note" id="now-note"></p>
+      <div class="now-meta"><span id="now-quota">今日剩余 5 次</span><button type="button" id="reset">重置</button></div>
+    </div>
+    <p class="fine">商品图为自绘示意图，不是真实照片。数值为假设值。</p>
+  </section>
+
+  <section class="stage" aria-label="手机原型">
+    <div class="phone-wrap" id="wrap"><div class="phone"><div class="phone-notch"></div><div id="screen"></div></div></div>
+  </section>
+
+  <aside class="switcher" aria-label="状态切换器">
+    <div class="sw-t">状态切换器</div>
+    <div id="groups"></div>
+  </aside>
+</div>
+<script src="assets/js/art.js"></script>
+<script src="assets/js/screens.js"></script>
+<script src="assets/js/prototype.js"></script>
+</body>
+</html>
